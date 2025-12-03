@@ -1,0 +1,425 @@
+\documentclass[11pt,a4paper]{article}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor} 
+\usepackage[most]{tcolorbox}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\usepackage{relsize}
+
+\fancyhf{}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[R]{\small L3 INFO}
+
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyfoot[L]{\small résolution du problème d’optimisation combinatoire « Burning Number »}
+\fancyfoot[R]{\thepage}
+
+\begin{document}
+
+\title{Méthodes exactes et heuristiques pour la résolution du problème d’optimisation combinatoire : Burning Number}
+\author{J. KOZIK}
+\date{01-07-2025}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+
+La propagation de l’influence sociale est un sujet majeur dans l’analyse des réseaux sociaux.\\
+Une étude récente sur la contagion émotionnelle sur Facebook a mis en évidence que la structure du réseau sous-jacent joue un rôle essentiel, tandis que les interactions en personne ne sont pas déterminantes. Ainsi, les utilisateurs du réseau transmettent cette contagion à leurs amis et à leurs proches, ce qui permet au phénomène de continuer à se diffuser au fil du temps.\\
+La question se pose alors : si l’objectif était de minimiser le nombre d’étapes nécessaires pour contaminer l’ensemble du réseau, quels utilisateurs devrait-on cibler en priorité, et dans quel ordre ?\\
+En tant que modèle simplifié de ce problème, on peut utiliser un procédé sur les graphes appelé le \textbf{\textit{burning}}.
+
+\subsection{The Burning Process}
+Soit un graphe $G = (B,NB,E)$.\\
+Dans le procédé du \textbf{\textit{burning}}, chaque sommet appartient à l'un des deux ensembles: \textbf{\textit{burned(B)}} ou \textbf{\textit{unburned(NB)}}.\\
+À chaque itération, on choisit un sommet à bruler.\\
+Lorsqu’un sommet $n$ est brûlé à l’itération $i$, alors à l’itération $i+1$,
+tous les sommets \emph{unburned} de son voisinage sont brulés.\\
+
+Le procédé se termine une fois que tous les sommets sont brulés (ie. l'ensemble $NB$ est vide).
+
+\subsection{The Burning Number Problem}
+
+On appelle le \textbf{\textit{burning number}} d'un graphe $G$, écrit $b(G)$, le nombre minimum d'itération nécessaire pour terminer le \textbf{\textit{burning process}}.\\
+
+Pour certaines classes de graphes, le burning number est connu, cependant de manière
+générale, il existe une conjecture postulant que pour tout graphe à $n$ sommets,
+$b(G) \leq \lceil\sqrt{n}\rceil$ . Pour le travail effectué lors du stage, les résultats important sont
+que les graphes cycles et chemins testés atteignent la borne de la conjecture.
+Le problème du burning number est classifé comme étant NP-complet.   
+
+\newpage
+
+\subsection{Burning Number and Process: Exemple}
+
+\subsubsection*{Initialisation}
+Soit $G$:
+\begin{itemize}
+\item[$\blacktriangleright$] $NB$ : $\lbrace A,B,C,D,E,F \rbrace$
+\item[$\blacktriangleright$] $B$ : $\lbrace \rbrace$ 
+\item[$\blacktriangleright$] $E$ : $\lbrace AB,AC,BD,CD,CE,BF \rbrace$
+\end{itemize}
+
+\bigskip
+
+\begin{tikzpicture}[node distance=2cm, every node/.style={circle, draw, minimum size=8mm}]
+    \node[fill=green!40] (A) {A};
+    \node[fill=green!40] (B) [right of=A] {B};
+    \node[fill=green!40] (C) [below of=A] {C};
+    \node[fill=green!40] (D) [right of=C] {D};
+    \node[fill=green!40] (E) [below of=C] {E};
+    \node[fill=green!40] (F) [right of=B] {F};
+
+    \draw (A) -- (B);
+    \draw (A) -- (C);
+    \draw (B) -- (D);
+    \draw (C) -- (D);
+    \draw (C) -- (E);
+    \draw (B) -- (F);
+\end{tikzpicture}
+
+\subsection*{Etape 1A: Propagation}
+Aucun sommet n'a été brulé à l'étape 0, donc le graphe reste inchangé.
+
+\subsection*{Etape 1B: Choix d'un sommet: C}
+
+\begin{itemize}
+\item[$\blacktriangleright$] $NB$ : $\lbrace A,B,D,E,F \rbrace$
+\item[$\blacktriangleright$] $B$ : $\lbrace C \rbrace$ 
+\item[$\blacktriangleright$] $E$ : $\lbrace AB,AC,BD,CD,CE,BF \rbrace$
+\end{itemize}
+
+\bigskip
+
+\begin{tikzpicture}[node distance=2cm, every node/.style={circle, draw, minimum size=8mm}]
+    \node[fill=green!40] (A) {A};
+    \node[fill=green!40] (B) [right of=A] {B};
+    \node[fill=red!40] (C) [below of=A] {C};
+    \node[fill=green!40] (D) [right of=C] {D};
+    \node[fill=green!40] (E) [below of=C] {E};
+    \node[fill=green!40] (F) [right of=B] {F};
+
+    \draw (A) -- (B);
+    \draw (A) -- (C);
+    \draw (B) -- (D);
+    \draw (C) -- (D);
+    \draw (C) -- (E);
+    \draw (B) -- (F);
+\end{tikzpicture}
+
+\newpage
+
+\subsection*{Etape 2A: Propagation}
+
+\begin{itemize}
+\item[$\blacktriangleright$] $NB$ : $\lbrace B,F \rbrace$
+\item[$\blacktriangleright$] $B$ : $\lbrace A,C,D,E \rbrace$ 
+\item[$\blacktriangleright$] $E$ : $\lbrace AB,AC,BD,CD,CE,BF \rbrace$
+\end{itemize}
+
+\bigskip
+
+\begin{tikzpicture}[node distance=2cm, every node/.style={circle, draw, minimum size=8mm}]
+    \node[fill=red!40] (A) {A};
+    \node[fill=green!40] (B) [right of=A] {B};
+    \node[fill=red!40] (C) [below of=A] {C};
+    \node[fill=red!40] (D) [right of=C] {D};
+    \node[fill=red!40] (E) [below of=C] {E};
+    \node[fill=green!40] (F) [right of=B] {F};
+
+    \draw (A) -- (B);
+    \draw (A) -- (C);
+    \draw (B) -- (D);
+    \draw (C) -- (D);
+    \draw (C) -- (E);
+    \draw (B) -- (F);
+\end{tikzpicture}
+
+
+\subsection*{Etape 2B: Choix d'un sommet: F}
+
+\begin{itemize}
+\item[$\blacktriangleright$] $NB$ : $\lbrace B \rbrace$
+\item[$\blacktriangleright$] $B$ : $\lbrace A,C,D,E,F \rbrace$ 
+\item[$\blacktriangleright$] $E$ : $\lbrace AB,AC,BD,CD,CE,BF \rbrace$
+\end{itemize}
+
+\bigskip
+
+\begin{tikzpicture}[node distance=2cm, every node/.style={circle, draw, minimum size=8mm}]
+    \node[fill=red!40] (A) {A};
+    \node[fill=green!40] (B) [right of=A] {B};
+    \node[fill=red!40] (C) [below of=A] {C};
+    \node[fill=red!40] (D) [right of=C] {D};
+    \node[fill=red!40] (E) [below of=C] {E};
+    \node[fill=red!40] (F) [right of=B] {F};
+
+    \draw (A) -- (B);
+    \draw (A) -- (C);
+    \draw (B) -- (D);
+    \draw (C) -- (D);
+    \draw (C) -- (E);
+    \draw (B) -- (F);
+\end{tikzpicture}
+
+\newpage
+
+\subsection*{Etape 3A: Propagation}
+
+\begin{itemize}
+\item[$\blacktriangleright$] $NB$ : $\lbrace \rbrace$
+\item[$\blacktriangleright$] $B$ : $\lbrace A,B,C,D,E,F \rbrace$ 
+\item[$\blacktriangleright$] $E$ : $\lbrace AB,AC,BD,CD,CE,BF \rbrace$
+\end{itemize}
+
+\bigskip
+
+\begin{tikzpicture}[node distance=2cm, every node/.style={circle, draw, minimum size=8mm}]
+    \node[fill=red!40] (A) {A};
+    \node[fill=red!40] (B) [right of=A] {B};
+    \node[fill=red!40] (C) [below of=A] {C};
+    \node[fill=red!40] (D) [right of=C] {D};
+    \node[fill=red!40] (E) [below of=C] {E};
+    \node[fill=red!40] (F) [right of=B] {F};
+
+    \draw (A) -- (B);
+    \draw (A) -- (C);
+    \draw (B) -- (D);
+    \draw (C) -- (D);
+    \draw (C) -- (E);
+    \draw (B) -- (F);
+\end{tikzpicture}
+
+\subsection*{Etape 3B: choix d'un sommet}
+
+Puisque l'ensemble des sommets $NB$ est vide, le choix pour le troisième sommet est arbitraire.
+
+\subsubsection{Résultat}
+
+Le \textbf{\textit{burning process}} se termine après un total de 3 itération. On en conclus que $b(G)=3$, et la séquence qui permet d'arriver à ce résultat est $\lbrace C,F,?\rbrace$.
+
+\section{Travail effectué}
+
+\subsection{Objectif}
+
+L'objectif du stage était de s'appuyer sur le paradigme de la recherche arborescente et la programmation dynamique pour modéliser et implémenter et évaluer des méthodes permettant de retrouver des bonnes solutions pour le problème du Burning Number.
+
+\newpage
+
+\subsection{Modélisation Naive}
+
+Dans un premier temps, l’objectif du stage était de créer une modélisation naïve du problème afin d’obtenir une solution rapide, même si celle-ci pouvait être moins précise.
+
+\subsubsection{Etat/Noeud}
+
+A chaque itération du \textit{burning process} un noeud $v$ décrit:\\
+\begin{itemize}
+\item[$\blacktriangleright$] un graphe connexe $G = (B,NB,E)$
+\item[$\blacktriangleright$] $N$ : l'ensemble des sommets brulés.
+\item[$\blacktriangleright$] $NB$ : l'ensemble des sommets non-brulés.
+\item[$\blacktriangleright$] $E$: l'ensemble des arêtes.
+\item[$\blacktriangleright$] $n$ : le numéro de la séquence.
+\item[$\blacktriangleright$] $B_v$ : la liste de sommets $v$ brulés par la balle de taille $B$.
+\item[$\blacktriangleright$] $C$ : la liste de sommet au centre de chaque balle.
+\item[$\blacktriangleright$] $score$ : un score associé à l'état.
+\end{itemize}
+
+\subsubsection*{Calcul du score pour la version naive}
+
+Afin de déterminer le \textit{burning number} minimal, on associe à chaque nœud 
+$v \in V$ un score $s(v)$ défini par:\\
+
+\begin{equation}
+s(v) = \sum_{i=0}^{\lvert B_v \rvert} \frac{\lvert B_v[i] \rvert}{i^2}
+\end{equation}
+
+\newpage
+
+\subsubsection{Résultats sur les instances}
+
+\begin{table}[h!]
+\centering
+\caption{Résultats obtenus avec la modélisation naïve. Où, $V$ représente le nombre de sommets, $E$ le nombre d’arêtes, $U$ la borne supérieure, $b(G)$ la valeur optimale du \textit{burning number}, $Gap$ la différence entre $U$ et $b(G)$, et $R$ le résultat obtenu avec le modèle naïf.}
+
+\bigskip
+
+\begin{tabular}{|l|r|r|r|r|r|r|r|}
+\hline
+Instances & $V$ & $E$ & $U$ & $b(G)$ & Gap & $R$\\
+\hline
+karate & 34 & 78 & 3 & 2 & 0\% & 3 \\
+chesapeake & 39 & 170 & 2 & 2 & 0\% & 2 \\
+dolphins & 62 & 159 & 4 & 3 & 29\% & 3 \\
+rt-retweet & 96 & 117 & 5 & 4 & 32\% & 5 \\
+polbooks & 105 & 441 & 3 & 3 & 5\% & 3 \\
+adjnoun & 112 & 425 & 3 & 3 & 0\% & 3 \\
+ia-infect-hyper & 113 & 2196 & 2 & 2 & 7\% & 3 \\
+C125-9 & 125 & 6963 & 5 & 2 & 46\% & 4 \\
+ia-enron-only & 143 & 623 & 4 & 3 & 11\% & 4 \\
+c-fat200-1 & 200 & 1534 & 6 & 6 & 3\% & 7\\
+c-fat200-2 & 200 & 3235 & 4 & 4 & 0\% & 4\\
+c-fat200-5 & 200 & 8473 & 2 & 2 & 0\% & 2\\
+sphere & 258 & 1026 & 7 & 6 & 40\% & 7\\
+DD244 & 291 & 822 & 8 & 6 & 58\% & 7\\
+ca-netscience & 379 & 914 & 7 & 5 & 57\% & 7\\
+infect-dublin & 410 & 2765 & 5 & 4 & 55\% & 5 \\
+c-fat500-1 & 500 & 4459 & 10 & 8 & 35\% & 10\\
+c-fat500-2 & 500 & 9139 & 6 & 6 & 0\% & 6\\
+c-fat500-5 & 500 & 23191 & 2 & 4 & 15\% & 4\\
+bio-diseaseome & 516 & 1188 & 7 & 6 & 42\% & 7\\
+web-polblogs & 643 & 2280 & 5 & 4 & 0\% & 5\\
+DD687 & 725 & 2600 & 9 & 6 & 65\% & 8\\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+\subsection{Modélisation avec des balles}
+
+
+Dans un second temps, l’objectif du stage était de concevoir une modélisation basée sur l’utilisation de balles afin d’améliorer la précision de la solution, quitte à augmenter le temps de calcul nécessaire pour l’obtenir.\\
+
+La modélisation du noeud ne change pas, seulement le calcul du score.\\
+
+\subsubsection*{Calcul du score pour la modélisation par balles}
+
+Nous définissons, pour chaque sommet $v$, une famille de balles
+$B_v[i]$ correspondant à l’ensemble des sommets situés à distance
+exactement $i$ de $v$. Le score associé à $v$ est alors donné par :
+\begin{equation}
+s(v) = \sum_{i=0}^{|B_v|-1} \text{score\_sommet}(v,i)
+\;-\; \operatorname{diam}(N_B)^2,
+\label{eq:score}
+\end{equation}
+où $|B_v[i]|$ désigne la cardinalité de la $i$-ième balle autour de 
+$v$, et $\operatorname{diam}(N_B)$ le diamètre du sous-graphe considéré.
+
+La contribution locale est définie par :
+\begin{equation}
+\text{score\_sommet}(v,i) =
+\begin{cases}
+|B_v[0]|, & \text{si } i = 0, \\
+\dfrac{|B_v[i]|}{i^2}, & \text{si } i \ge 1.
+\end{cases}
+\end{equation}
+
+\centering
+\begin{tikzpicture}[scale=1.35,
+    every node/.style={circle, draw, minimum size=7mm, font=\small}]
+
+    \node[fill=red!50] (v) at (0,0) {$v$};
+
+    \node[fill=blue!30] (a) at (1.3,0.3) {};
+    \node[fill=blue!30] (b) at (0.5,1.2) {};
+    \node[fill=blue!30] (c) at (-1.1,-0.2) {};
+
+    \node[fill=green!40] (d) at (2.5,0.9) {};
+    \node[fill=green!40] (e) at (2.6,-0.4) {};
+    \node[fill=green!40] (f) at (-2.0,1.3) {};
+    \node[fill=green!40] (g) at (-2.3,-1.0) {};
+
+    % Edges
+    \draw (v) -- (a);
+    \draw (v) -- (b);
+    \draw (v) -- (c);
+
+    \draw (a) -- (d);
+    \draw (a) -- (e);
+    \draw (b) -- (f);
+    \draw (c) -- (g);
+
+    \draw[dashed] (0,0) circle (1.5cm);
+    \draw[dashed] (0,0) circle (3cm);
+    
+    \node[draw=none] at (0,-1.7) {$B_v[1] : |B_v[1]| = 3$};
+    \node[draw=none] at (0,-2.3) {$B_v[2] : |B_v[2]| = 4$};
+
+
+\end{tikzpicture}
+
+\newpage
+
+\begin{flushleft}
+
+\subsubsection{Résultats sur les instances}
+
+\begin{table}[h!]
+\centering
+\caption{Résultats obtenus avec la modélisation par balles. Où, $V$ représente le nombre de sommets, $E$ le nombre d’arêtes, $U$ la borne supérieure, $b(G)$ la valeur optimale du \textit{burning number}, $Gap$ la différence entre $U$ et $b(G)$, et $R$ le résultat obtenu avec le modèle par balles.}
+
+\bigskip
+
+\begin{tabular}{|l|r|r|r|r|r|r|r|}
+\hline
+Instances & $V$ & $E$ & $U$ & $b(G)$ & Gap & $R$\\
+\hline
+karate & 34 & 78 & 3 & 2 & 0\% & 2 \\
+chesapeake & 39 & 170 & 2 & 2 & 0\% & 2 \\
+dolphins & 62 & 159 & 4 & 3 & 29\% & 3 \\
+rt-retweet & 96 & 117 & 5 & 4 & 32\% & 4 \\
+polbooks & 105 & 441 & 3 & 3 & 5\% & 3 \\
+adjnoun & 112 & 425 & 3 & 3 & 0\% & 3 \\
+ia-infect-hyper & 113 & 2196 & 2 & 2 & 7\% & 2 \\
+C125-9 & 125 & 6963 & 5 & 2 & 46\% & 3 \\
+ia-enron-only & 143 & 623 & 4 & 3 & 11\% & 3 \\
+c-fat200-1 & 200 & 1534 & 6 & 6 & 3\% & 6\\
+c-fat200-2 & 200 & 3235 & 4 & 4 & 0\% & 4\\
+c-fat200-5 & 200 & 8473 & 2 & 2 & 0\% & 2\\
+sphere & 258 & 1026 & 7 & 6 & 40\% & 6\\
+DD244 & 291 & 822 & 8 & 6 & 58\% & 7\\
+ca-netscience & 379 & 914 & 7 & 5 & 57\% & 5\\
+infect-dublin & 410 & 2765 & 5 & 4 & 55\% & 4 \\
+c-fat500-1 & 500 & 4459 & 10 & 8 & 35\% & -\\
+c-fat500-2 & 500 & 9139 & 6 & 6 & 0\% & -\\
+c-fat500-5 & 500 & 23191 & 2 & 4 & 15\% & -\\
+bio-diseaseome & 516 & 1188 & 7 & 6 & 42\% & -\\
+web-polblogs & 643 & 2280 & 5 & 4 & 0\% & -\\
+DD687 & 725 & 2600 & 9 & 6 & 65\% & -\\
+\hline
+\end{tabular}
+\end{table}
+
+
+\section{Comparaison des modèles}
+
+Les deux modèles proposés ne résolvent le problème qu’approximativement et ne garantissent pas l’optimalité pour toutes les instances. Toutefois, le second modèle montre une nette supériorité. Le modèle naïf génère des solutions plus faibles, atteint rapidement les limites imposées par les instances, et peut même les dépasser, indiquant une moins bonne maîtrise de l’espace de recherche.
+\end{flushleft}
+
+\section{Bibliographie}
+
+\begin{enumerate}
+\item Anthony Bonato, Jeannette Janssen, Elham Roshanbin - \textit{How to burn a graph} - 2015
+\item Peter Norvig, Stuart Russell - \textit{Artificial Intelligence: A Modern Approach} - Third Edition - 2016
+\item Stéphane Bessy, Anthony Bonato, Jeannette Janssen, Dieter Rautenbach, Elham Roshanbin - \textit{Bounds on the burning number} - 2016
+\end{enumerate}
+
+\section*{Remerciement}
+\begin{flushleft}
+Je tiens à exprimer ma profonde gratitude à Rafael Colares Borges, dont l’accompagnement, les conseils et la disponibilité ont grandement contribué à mon apprentissage durant ce stage.
+
+Je remercie également ma responsable de licence, Fatiha Bendali-Mailfert, pour son suivi, ses retours et son soutien tout au long de cette période.
+
+Enfin, j’adresse mes remerciements aux trois étudiants qui ont partagé ce stage avec moi. Leur aide, leur bonne humeur et nos échanges quotidiens ont rendu cette expérience à la fois enrichissante et agréable.
+\end{flushleft}
+
+\end{document}
+
